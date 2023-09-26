@@ -1,14 +1,30 @@
-FROM node:18-alpine
+FROM node:18-alpine as builder
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
+ENV NODE_ENV build
+
+WORKDIR /app
+
+# Install dependencies first for better caching
 COPY package*.json ./
 
 RUN npm install
 
-# Bundle app source
-COPY . ./app
+COPY . .
+
+RUN apk add --update python3 make g++ \
+  && rm -rf /var/cache/apk/* \
+  && npm run build \
+  && npm prune --production 
+
+FROM node:18-alpine
+
+ENV NODE_ENV production
+
+WORKDIR /app
+
+COPY --from=builder /app/package*.json /app/
+COPY --from=builder /app/node_modules/ /app/node_modules/
+COPY --from=builder /app/dist/ /app/dist/
 
 # Create a new user with UID 10014
 RUN addgroup -g 10014 choreo && \
@@ -18,4 +34,4 @@ USER 10014
 
 EXPOSE 4000
 
-CMD ["node", "app/dist/main.js"]
+CMD ["node", "dist/main.js"]
