@@ -14,7 +14,7 @@ async function bootstrap() {
     .addTag('wso2')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  SwaggerModule.setup('api', app, document);
 
   await app.listen(process.env.SERVER_PORT || 4000);
 }

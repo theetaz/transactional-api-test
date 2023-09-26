@@ -106,7 +106,7 @@ export class BlockchainService {
 
     const transferAmount = ethers.utils.parseUnits(amount.toString(), decimals);
     const options = {
-      gasPrice: '35000000000',
+      gasPrice: '0',
     };
     const tx = await contract.transfer(
       recipientWalletAddress,
